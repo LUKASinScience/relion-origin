@@ -1,0 +1,24 @@
+[project]
+name = "relion-origin"
+version = "0.1.0"
+description = "Per-particle provenance, lineage and QC analysis for RELION projects (companion to reliontree, needs starfile)"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "starfile",
+    "reliontree",
+]
+
+[project.scripts]
+relion-origin = "relion_origin.cli:main"
+relion-origin-rerun = "relion_origin.rerun_cli:main"
+relion-origin-compare = "relion_origin.compare_cli:main"
+relion-origin-methods = "relion_origin.methods_cli:main"
+relion-origin-boxsize = "relion_origin.box_size_cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/relion_origin"]
