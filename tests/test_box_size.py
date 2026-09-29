@@ -76,6 +76,18 @@ def test_recommended_box_size_from_ctf_requires_exactly_one_source():
         raise AssertionError("expected ValueError when both ctf_by_tomogram and particles_df are given")
 
 
+def test_diameter_adds_to_edge():
+    base = aliasing_free_box_size(300, 30000, 2.7, 1.0, 3.0)
+    with_d = aliasing_free_box_size(300, 30000, 2.7, 1.0, 3.0, diameter_angstrom=200)
+    assert abs(with_d["edge_angstrom"] - base["edge_angstrom"] - 200) < 1e-6
+
+
+def test_spa_percentile_ignores_outlier():
+    df = pd.DataFrame({"rlnDefocusU": [20000.0] * 999 + [90000.0], "rlnDefocusV": [20000.0] * 1000})
+    assert worst_case_defocus_spa(df) == 90000.0
+    assert worst_case_defocus_spa(df, 99) == 20000.0
+
+
 if __name__ == "__main__":
     test_aliasing_free_box_size_matches_js_reference()
     test_worst_case_defocus_sta()
@@ -83,4 +95,6 @@ if __name__ == "__main__":
     test_worst_case_defocus_spa()
     test_recommended_box_size_from_ctf_spa_path()
     test_recommended_box_size_from_ctf_requires_exactly_one_source()
+    test_diameter_adds_to_edge()
+    test_spa_percentile_ignores_outlier()
     print("box_size tests passed")
