@@ -20,6 +20,7 @@ from .compare import compare_resolution
 from .ctf import attach_tomogram_ctf, flag_dose_gaps, flag_inconsistent_tilts, flag_inconsistent_tomograms, tomogram_defocus_summary
 from .diagnose import diagnose_class, diagnose_class_from_flags
 from .io import load_particles, load_tomograms_star, resolve_column
+from .focused import class_occupancy_trajectory, collapsed_classes, offset_summary, rank_class_differences, read_mrc
 from .iteration_convergence import iteration_convergence, stable_since_iteration
 from .lineage import list_jobs_with_particles, particle_flow
 from .match import match_by_coordinate
@@ -56,6 +57,11 @@ __all__ = [
     "write_candidate_subset",
     "compare_resolution",
     "draft_methods_paragraph",
+    "offset_summary",
+    "rank_class_differences",
+    "class_occupancy_trajectory",
+    "collapsed_classes",
+    "read_mrc",
     "aliasing_free_box_size",
     "worst_case_defocus_sta",
     "worst_case_defocus_spa",
