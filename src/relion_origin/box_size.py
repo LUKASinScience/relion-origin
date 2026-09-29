@@ -46,7 +46,7 @@ def _next_fft_friendly(n):
         candidate += 1
 
 
-def aliasing_free_box_size(kv, defocus_angstrom, cs_mm, pixel_size_angstrom, resolution_angstrom, steps=400):
+def aliasing_free_box_size(kv, defocus_angstrom, cs_mm, pixel_size_angstrom, resolution_angstrom, steps=400, diameter_angstrom=0):
     """Minimum box edge (Angstrom and pixels) that avoids CTF aliasing at
     the given defocus, up to `resolution_angstrom`.
 
@@ -66,7 +66,8 @@ def aliasing_free_box_size(kv, defocus_angstrom, cs_mm, pixel_size_angstrom, res
     delocalization = wavelength * s * np.abs(defocus_angstrom - cs_angstrom * wavelength**2 * s**2)
     d_max = float(delocalization.max())
 
-    edge_angstrom = 2 * math.sqrt(2) * d_max
+    # Warp/M: box >= particle diameter + delocalization on both sides.
+    edge_angstrom = diameter_angstrom + 2 * math.sqrt(2) * d_max
     box_px_raw = edge_angstrom / pixel_size_angstrom
 
     return {
@@ -94,16 +95,18 @@ def worst_case_defocus_sta(ctf_by_tomogram):
     return worst
 
 
-def worst_case_defocus_spa(particles_df):
+def worst_case_defocus_spa(particles_df, percentile=100):
     """Highest per-particle defocus (max of DefocusU/V) in a SPA particle
-    table -- the SPA equivalent of `worst_case_defocus_sta`."""
-    return max(
-        pd.to_numeric(particles_df["rlnDefocusU"], errors="coerce").max(),
-        pd.to_numeric(particles_df["rlnDefocusV"], errors="coerce").max(),
-    )
+    table -- the SPA equivalent of `worst_case_defocus_sta`. `percentile`
+    < 100 ignores a few outlier particles with a bad CTF fit."""
+    per_particle = pd.concat([
+        pd.to_numeric(particles_df["rlnDefocusU"], errors="coerce"),
+        pd.to_numeric(particles_df["rlnDefocusV"], errors="coerce"),
+    ], axis=1).max(axis=1)
+    return float(np.nanpercentile(per_particle, percentile))
 
 
-def recommended_box_size_from_ctf(kv, cs_mm, pixel_size_angstrom, resolution_angstrom, ctf_by_tomogram=None, particles_df=None):
+def recommended_box_size_from_ctf(kv, cs_mm, pixel_size_angstrom, resolution_angstrom, ctf_by_tomogram=None, particles_df=None, diameter_angstrom=0, percentile=100):
     """`aliasing_free_box_size` using the real worst-case defocus from
     either STA (`ctf_by_tomogram`, from `io.load_tomograms_star`) or SPA
     (`particles_df`, needs `rlnDefocusU/V`) project data, instead of a
@@ -113,8 +116,8 @@ def recommended_box_size_from_ctf(kv, cs_mm, pixel_size_angstrom, resolution_ang
         raise ValueError("recommended_box_size_from_ctf: pass exactly one of ctf_by_tomogram or particles_df")
 
     worst_defocus = (
-        worst_case_defocus_sta(ctf_by_tomogram) if ctf_by_tomogram is not None else worst_case_defocus_spa(particles_df)
+        worst_case_defocus_sta(ctf_by_tomogram) if ctf_by_tomogram is not None else worst_case_defocus_spa(particles_df, percentile)
     )
-    result = aliasing_free_box_size(kv, worst_defocus, cs_mm, pixel_size_angstrom, resolution_angstrom)
+    result = aliasing_free_box_size(kv, worst_defocus, cs_mm, pixel_size_angstrom, resolution_angstrom, diameter_angstrom=diameter_angstrom)
     result["worst_case_defocus_angstrom"] = worst_defocus
     return result
