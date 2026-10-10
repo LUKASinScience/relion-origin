@@ -148,14 +148,6 @@ classifier — see [ANTIDOTE](https://github.com/herzik-lab/ANTIDOTE) for
 that (metadata-driven NN for 3D particle sorting; complementary to this
 tool, not something to rebuild here).
 
-## Language/runtime decision
-
-Python, not Mojo, at least not to start. The bottleneck here is I/O and
-join/aggregation over large STAR tables, not numerical/GPU compute —
-`starfile` for reading, `polars` or `duckdb` for anything past a few
-hundred thousand rows. Mojo stays a documented option for a specific,
-benchmarked-slow kernel later.
-
 ## Relationship to reliontree
 
 Standalone package, own `pyproject.toml`, own dependencies — not a
@@ -205,17 +197,6 @@ the annotations reader) shows them as pills on the job cards. The QC-candidate
 share is deliberately not annotated: with the default median confidence threshold
 it flags about half of all particles of any classification.
 
-## Testing
-
-Package installs cleanly (see Install below), the automated tests pass under pytest, and every command plus the
-GUI has been run end to end against a real RELION 5 cryo-ET/STA project (WarpTools + pytom template matching) —
-including error paths (missing file, wrong column name both give a clear message
-and a non-zero exit code, not a traceback).
-
-**Tested on more than one project**: besides that STA project, the commands ran on three single-particle
-projects (a deposited helical RELION 4 project, the RELION 3.1 and the RELION 5.0 tutorial results). Still missing: a second independent *STA* project (the public RELION-5 STA results,
-Zenodo 11068319, are 29.5 GB and were too slow to fetch).
-
 ## Install
 
 `reliontree` (>= 0.3.0) is a dependency and is not on PyPI yet, so `pip install -e .` alone fails with
@@ -233,7 +214,7 @@ through a file (`<project>/.reliontree/annotations/relion-origin.json`, written 
 reliontree shows them as pills on the job cards when the file exists.
 
 See `CHEATSHEET.md` for copy-paste commands (GUI, particle-flow tracking,
-provenance matching, CTF QC, rerun helper, methods draft, tests). Short
+provenance matching, CTF QC, rerun helper, methods draft). Short
 version:
 
 ```bash
@@ -249,46 +230,12 @@ relion-origin-annotate /path/to/project            # write orientation/QC findin
 or, without installing, straight from a checkout (see CHEATSHEET.md for the
 full `PYTHONPATH` form).
 
-What's useful to check and report back on:
-
-- **SPA project**: does `io.load_particles` find `rlnDefocusU/V`,
-  `rlnMaxValueProbDistribution` etc. directly on the particle table (it
-  should — SPA keeps CTF there, unlike STA)? Does the GUI render sensible
-  per-class histograms? (Only tested so far on a synthetic SPA-shaped
-  DataFrame, not a real SPA STAR file.)
-- **A second STA project**: does the `rlnDefocusU/V`-in-`tomograms.star`
-  assumption in `ctf.py`/`io.load_tomograms_star` hold, or does a
-  different WarpTools/RELION version name things differently?
-- **`lineage.py`** (`relion_origin.lineage.particle_flow(project_dir)`):
-  do the per-job particle counts match what you already know about your
-  own pipeline? Any job type where the `particles.star`/`run_data.star`
-  detection in `_job_particle_count` picks the wrong file or misses one?
-- **The actual missing evidence**: run
-  `relion-origin-rerun` on a real project, do the targeted RELION rerun,
-  then `relion-origin-compare` the before/after resolution. That number
-  is what turns this from "plausible" into "measured".
-- Anything that crashes outright, rather than just looking wrong — that's
-  the higher-priority class of bug to report.
-
-## Tests against a real project
-
-Most tests are self-contained. A few expect a real RELION project and are skipped unless you point them at one (they check
-numbers of one particular dataset, so they are only meaningful for that data):
-
-```bash
-export RELION_ORIGIN_TEST_PROJECT=/path/to/relion/project             # compare / lineage / iteration-convergence tests
-export RELION_ORIGIN_TEST_MATCH_DIR=/path/to/dir/with/the/star/files   # match-centering test
-export RELION_ORIGIN_TEST_TOMOGRAMS_STAR=/path/to/..._tomograms.star
-python -m pytest tests
-```
-
 ## Credits and third-party material
 
 - No third-party source code is bundled. Runtime dependencies keep their own licenses: starfile (BSD-3-Clause), numpy and
   pandas (BSD-3-Clause), all compatible with AGPL-3.0-or-later; reliontree is AGPL-3.0-or-later.
 - The box-size calculator follows the CTF-delocalization approach of Warp/M (Tegunov et al.); the angular-sampling and
-  regularisation heuristics are the textbook Crowther criterion and RELION's published guidance. Only the published ideas
-  are used, no code. The calculators are ports of the author's own Cryo-EM-Guide JavaScript.
+  regularisation heuristics are the textbook Crowther criterion and RELION's published guidance.
 - Reading RELION's STAR/`.bild` files and calling its programs is plain use of RELION's documented file formats (RELION is GPL).
 - Prior art is cited where relevant (RELION-Convergence-Inspector, ANTIDOTE); nothing was copied from it.
 
