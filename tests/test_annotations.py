@@ -20,25 +20,32 @@ def _df(n_per_class, clustered_class=None, seed=0):
     return pd.concat(rows, ignore_index=True)
 
 
-def test_clustered_class_is_flagged_with_five_classes():
-    notes = annotate_particles(_df({1: 400, 2: 400, 3: 400, 4: 400, 5: 400}, clustered_class=3))
-    labels = [n["label"] for n in notes]
-    assert any(l == "clustered views: C3" for l in labels)
-    assert all(n["level"] in ("good", "warn", "bad", "info") and n["detail"] for n in notes)
-    assert not any("QC candidates" in l for l in labels)  # raw share is not calibrated, see annotations.py
-    assert not any(l.startswith("mixed beyond chance") for l in labels)  # these classes are independent of confidence
+def _views(n, z_lo, z_hi, seed=0, rot_hi=360.0, tomo=False):
+    rng = np.random.default_rng(seed)
+    df = pd.DataFrame({"rlnAngleRot": rng.uniform(0, rot_hi, n) - 180 * (rot_hi == 360.0),
+                       "rlnAngleTilt": np.degrees(np.arccos(rng.uniform(z_lo, z_hi, n)))})
+    return df.assign(rlnTomoName="ts_01") if tomo else df
 
 
-def test_few_classes_get_an_info_line_not_a_flag():
-    notes = annotate_particles(_df({1: 300, 2: 300}))
-    orient = [n for n in notes if n["label"].startswith("orientation R=")]
-    assert len(orient) == 1 and orient[0]["level"] == "info"
+def test_views_gap_pill_for_single_particle_data_is_a_warning_and_even_data_gets_none():
+    even = annotate_particles(_views(20000, -1, 1))
+    assert not any(n["label"].startswith("views:") for n in even)
+    one_hemisphere = [n for n in annotate_particles(_views(20000, 0, 1)) if n["label"].startswith("views:")]
+    assert len(one_hemisphere) == 1 and one_hemisphere[0]["level"] == "warn" and "50%" in one_hemisphere[0]["label"]
+    assert "preferred orientation" in one_hemisphere[0]["detail"].lower()
+    assert not any("clustered" in n["label"] for n in annotate_particles(_views(20000, 0, 1)))
 
 
-def test_single_refinement_without_class_column_still_reports_orientation():
-    df = _df({1: 500}).drop(columns=["rlnClassNumber", "rlnMaxValueProbDistribution"])
-    notes = annotate_particles(df)
-    assert [n["label"][:14] for n in notes] == ["orientation R="]
+def test_views_gap_pill_for_subtomogram_data_is_only_informational():
+    notes = [n for n in annotate_particles(_views(20000, 0, 1, tomo=True)) if n["label"].startswith("views:")]
+    assert notes and notes[0]["level"] == "info" and "picking geometry" in notes[0]["detail"]
+
+
+def test_symmetry_is_folded_before_gaps_are_reported():
+    wedge = _views(20000, -1, 1, rot_hi=60.0)                       # one 60-degree wedge of rot
+    assert any(n["label"].startswith("views:") for n in annotate_particles(wedge, sym="C1"))
+    assert not any(n["label"].startswith("views:") for n in annotate_particles(wedge, sym="C6"))
+    assert not any(n["label"].startswith("views:") for n in annotate_particles(wedge, sym="D2"))   # unsupported: no verdict
 
 
 def test_write_annotations_roundtrip_and_name_check(tmp_path):
@@ -54,3 +61,9 @@ def test_mixing_beyond_chance_is_annotated_only_when_it_exceeds_chance():
                            "rlnMaxValueProbDistribution": [0.1 + 0.03 * i for i in range(14)] + [0.8, 0.85, 0.9, 0.9, 0.95, 0.95]})
     notes = annotate_particles(linked)
     assert notes and notes[0]["label"].startswith("mixed beyond chance") and notes[0]["level"] == "warn"
+
+
+def test_project_type_overrides_the_column_guess():
+    df = _views(20000, 0, 1)                                   # no rlnTomoName column
+    assert [n for n in annotate_particles(df) if n["label"].startswith("views:")][0]["level"] == "warn"
+    assert [n for n in annotate_particles(df, tomography=True) if n["label"].startswith("views:")][0]["level"] == "info"

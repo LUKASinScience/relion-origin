@@ -14,6 +14,8 @@ Embleton 1987), not something specific to relion-origin -- we're just
 applying it to RELION's own AngleRot/AngleTilt per particle.
 """
 
+import re
+
 import numpy as np
 import pandas as pd
 
@@ -66,3 +68,61 @@ def flag_clustered_orientation(df, class_col="rlnClassNumber", z_threshold=1.5):
         return pd.Series(False, index=scores.index)
     robust_z = (scores - median) / (1.4826 * mad)
     return robust_z >= z_threshold
+
+
+# ---- preferred orientation: how much of the viewing sphere is (nearly) empty ----------------------------------
+# The mean resultant length R above cancels for antipodal clusters (equal top and bottom views read as "even"),
+# so it cannot detect the typical preferred orientation. This works on the angular histogram instead.
+
+Z_BANDS, PHI_BINS = 8, 24        # 192 cells of equal area (equal steps in cos(tilt) x equal steps in rot)
+POOR_FRACTION_OF_EXPECTED = 0.2  # a cell is "poorly covered" below 20% of the particles an even sphere would put in it
+MIN_PARTICLES_PER_CELL = 10      # fewer than this on average and the histogram is mostly noise
+
+
+def parse_cyclic_symmetry(sym):
+    """n for 'C<n>' (n divides 24, so the 24 rot bins fold cleanly), None for anything else (D, T, O, I, helical)."""
+    m = re.fullmatch(r"[Cc](\d+)", (sym or "C1").strip())
+    return int(m.group(1)) if m and 24 % int(m.group(1)) == 0 else None
+
+
+def orientation_histogram(df, rot_col="rlnAngleRot", tilt_col="rlnAngleTilt", z_bands=Z_BANDS, phi_bins=PHI_BINS, fold=1):
+    """Particle counts on an equal-area grid of viewing directions: array [z_bands, phi_bins // fold].
+    `fold` = n for a Cn particle: viewing directions that differ by a rotation of 360/n degrees about the symmetry
+    axis (rot -> rot + 360/n) show the same view of the particle, so they share a cell."""
+    rot = pd.to_numeric(df[rot_col], errors="coerce").to_numpy(dtype=float)
+    tilt = pd.to_numeric(df[tilt_col], errors="coerce").to_numpy(dtype=float)
+    ok = np.isfinite(rot) & np.isfinite(tilt)
+    z = np.cos(np.radians(tilt[ok]))
+    zi = np.clip(((z + 1) / 2 * z_bands).astype(int), 0, z_bands - 1)
+    period = 360.0 / fold
+    cols = phi_bins // fold
+    pi = np.clip(((rot[ok] % period) / period * cols).astype(int), 0, cols - 1)
+    counts = np.zeros((z_bands, cols), dtype=int)
+    np.add.at(counts, (zi, pi), 1)
+    return counts
+
+
+def orientation_coverage(df, rot_col="rlnAngleRot", tilt_col="rlnAngleTilt", sym="C1"):
+    """{"n", "poor_fraction", "evenness"} for one set of particles, or None when there are too few particles per cell
+    or the symmetry is not handled (only C1 and Cn).
+
+    `poor_fraction`: share of the viewing sphere (by area, after folding the symmetry) holding fewer than 20% of the
+    particles an even distribution would put there. 0 = no gaps; 0.5 = half of all viewing directions are nearly empty
+    (all views on one hemisphere, or only top and bottom views, ...). `evenness`: normalised entropy, 1 = perfectly even.
+    Whether a high poor_fraction is a problem depends on the experiment: single-particle work wants it near 0, while
+    membrane-bound subtomogram averaging is restricted by the picking geometry by design."""
+    fold = parse_cyclic_symmetry(sym)
+    if fold is None:
+        return None
+    counts = orientation_histogram(df, rot_col, tilt_col, fold=fold)
+    n = int(counts.sum())
+    cells = counts.size
+    if n < MIN_PARTICLES_PER_CELL * cells:
+        return None
+    expected = n / cells
+    p = counts[counts > 0] / n
+    return {
+        "n": n,
+        "poor_fraction": float((counts < POOR_FRACTION_OF_EXPECTED * expected).mean()),
+        "evenness": float(-(p * np.log(p)).sum() / np.log(cells)),
+    }
