@@ -282,6 +282,16 @@ export RELION_ORIGIN_TEST_TOMOGRAMS_STAR=/path/to/..._tomograms.star
 python -m pytest tests
 ```
 
+## Credits and third-party material
+
+- No third-party source code is bundled. Runtime dependencies keep their own licenses: starfile (BSD-3-Clause), numpy and
+  pandas (BSD-3-Clause), all compatible with AGPL-3.0-or-later; reliontree is AGPL-3.0-or-later.
+- The box-size calculator follows the CTF-delocalization approach of Warp/M (Tegunov et al.); the angular-sampling and
+  regularisation heuristics are the textbook Crowther criterion and RELION's published guidance. Only the published ideas
+  are used, no code. The calculators are ports of the author's own Cryo-EM-Guide JavaScript.
+- Reading RELION's STAR/`.bild` files and calling its programs is plain use of RELION's documented file formats (RELION is GPL).
+- Prior art is cited where relevant (RELION-Convergence-Inspector, ANTIDOTE); nothing was copied from it.
+
 ## License
 
 AGPL-3.0-or-later, the same as [reliontree](https://github.com/LUKASinScience/reliontree), which it imports.
