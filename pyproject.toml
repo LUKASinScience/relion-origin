@@ -1,6 +1,6 @@
 [project]
 name = "relion-origin"
-version = "0.2.0"
+version = "0.3.0"
 description = "Per-particle provenance, lineage and QC analysis for RELION projects (companion to reliontree, needs starfile)"
 readme = "README.md"
 requires-python = ">=3.9"
