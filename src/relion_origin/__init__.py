@@ -15,6 +15,7 @@ See README.md for the full command-line tools and the build plan for the
 per-module design decisions.
 """
 
+from .annotations import annotate_particles, annotate_project, write_annotations
 from .box_size import aliasing_free_box_size, recommended_box_size_from_ctf, worst_case_defocus_spa, worst_case_defocus_sta
 from .compare import compare_resolution
 from .ctf import attach_tomogram_ctf, flag_dose_gaps, flag_inconsistent_tilts, flag_inconsistent_tomograms, tomogram_defocus_summary
@@ -34,6 +35,9 @@ __version__ = "0.1.0"
 
 __all__ = [
     "__version__",
+    "annotate_particles",
+    "annotate_project",
+    "write_annotations",
     "load_particles",
     "load_tomograms_star",
     "resolve_column",
