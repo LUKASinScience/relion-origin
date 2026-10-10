@@ -1,6 +1,6 @@
-"""Aliasing-free particle-box-size calculator, ported from the project's
-own `aliasing_box_calculator.js` (Cryo-EM-Guide), which follows Warp/M's
-(Tegunov) CTF-delocalization approach.
+"""Aliasing-free particle-box-size calculator, ported from the author's own
+JavaScript calculator, which follows Warp/M's (Tegunov) CTF-delocalization
+approach.
 
 At high defocus, high-resolution signal is spatially delocalized in real
 space; a particle box that's too small under-samples the resulting rapid

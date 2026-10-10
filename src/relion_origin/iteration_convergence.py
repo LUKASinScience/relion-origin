@@ -7,7 +7,7 @@ Prior art: `chenyiguang2026/RELION-Convergence-Inspector`
 does this at much greater depth (angular change under Cn symmetry, map
 correlation, three separate stability conclusions). This module covers only
 the class-switch-rate piece, sized for what `diagnose.py` and
-relion-autopilot's plateau detection need: a per-transition switch rate and
+plateau detection in downstream tools need: a per-transition switch rate and
 the iteration classification became stable, not a full convergence report.
 """
 

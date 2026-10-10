@@ -101,7 +101,7 @@ What's built and working (`src/relion_origin/`):
   actually spreads.
 - **`box_size.py`/`box_size_cli.py`** (`relion-origin-boxsize`) — aliasing-
   free particle-extraction box size (Warp/M's CTF-delocalization approach,
-  ported from the Cryo-EM-Guide's own calculator), sized against the
+  ported from the author's own JavaScript calculator), sized against the
   project's real worst-case defocus from `ctf.py`/particle CTF data
   instead of a guessed value — a box sized for the mean defocus aliases
   exactly the highest-defocus tomograms/micrographs. Verified bit-for-bit

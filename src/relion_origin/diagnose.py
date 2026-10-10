@@ -86,9 +86,9 @@ def diagnose_class(
 def diagnose_class_from_flags(flags_by_metric, class_index, **kwargs):
     """`diagnose_class`, fed from per-particle flag Series that a caller
     already computed (e.g. `qc.flag_class_outliers` per metric, as
-    server.py's `_build_page_cache` and relion-autopilot's engine both do)
+    server.py's `_build_page_cache` and downstream tools both do)
     instead of recomputing MVPD/NSS outlier stats here -- one shared
-    definition of the fraction so the GUI and relion-autopilot agree.
+    definition of the fraction so the GUI and downstream tools agree.
 
     `flags_by_metric`: {metric_name: pd.Series(bool)} over the full particle
     table. `class_index`: the index of the class being diagnosed.
