@@ -32,7 +32,7 @@ from .reference import class_reference_similarity, map_similarity
 from .rerun import write_candidate_subset
 from .spatial import edge_distance_spa, edge_distance_sta, flag_near_edge, particle_density_outliers
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 __all__ = [
     "__version__",
