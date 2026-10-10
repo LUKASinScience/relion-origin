@@ -1,11 +1,11 @@
 """Per-tomogram CTF/defocus QC for STA data.
 
-STA CTF doesn't live on the particle table (see the build plan ##6): RELION
+STA CTF doesn't live on the particle table: RELION
 fits *one* reference defocus per tilt image, not per particle -- the
 per-particle value RELION itself uses during refinement is a geometric
 projection of the 3D particle position onto that per-tilt reference,
 computed from `rlnTomoProjX/Y/Z/W` inside RELION's own C++ code (not
-published as a formula, confirmed by research -- see the build plan).
+published as a formula, confirmed by research).
 
 Reproducing that exactly is out of scope here. What this module gives you
 instead is an honest, simpler QC signal: for each tomogram, the mean and
@@ -111,9 +111,7 @@ def flag_dose_gaps(ctf_by_tomogram, dose_col="rlnMicrographPreExposure", max_mul
     ... -> falling, not rising, within a single tomogram's block).
     Working on the absolute step size, not its sign or trend, avoids
     baking in an acquisition-order assumption that would false-flag
-    every dose-symmetric tilt series (see the build plan ##14 -- this
-    replaces an earlier, riskier "session drift" idea that would have
-    needed exactly that unavailable acquisition-order data).
+    every dose-symmetric tilt series.
 
     The single-tilt dose unit is estimated per-tomogram as the smallest
     non-zero |diff| in the block (robust as long as most consecutive

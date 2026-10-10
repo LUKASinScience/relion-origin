@@ -1,4 +1,4 @@
-"""Regression test for the tomogram-centering fix (the build plan ##6): without
+"""Regression test for the tomogram-centering fix: without
 `tomogram_dims`, RELION's corner-origin particle coordinates don't match
 pytom's tomogram-centered coordinates at all. With it, they should line up
 almost exactly. Skips if the local test dataset isn't present -- this
@@ -12,13 +12,10 @@ import pytest
 from relion_origin.io import load_particles, load_tomograms_star
 from relion_origin.match import match_by_coordinate
 
-TESTDATA = Path("/path/to/test-data-data")
-TOMOGRAMS_STAR = (
-    TESTDATA
-    / "path/to/sta_project"
-    / "my_sta_project_bin8"
-    / "particles_my_sta_project_bin8_tomograms.star"
-)
+from conftest import env_path
+
+TESTDATA = env_path("RELION_ORIGIN_TEST_MATCH_DIR") or Path("/nonexistent")
+TOMOGRAMS_STAR = env_path("RELION_ORIGIN_TEST_TOMOGRAMS_STAR") or Path("/nonexistent")
 
 pytestmark = pytest.mark.skipif(not TOMOGRAMS_STAR.is_file(), reason="local test dataset not present")
 

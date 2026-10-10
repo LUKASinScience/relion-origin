@@ -12,7 +12,7 @@ one command and no setup:
   assets: every image is server-rendered inline, so it also works on an
   air-gapped cluster with no outbound internet.
 
-Design intent (the build plan ##21, ##22): the class is the unit, not the
+Design intent: the class is the unit, not the
 metric. A user looks at one average -- shown large, not a 32px icon --
 sees the particles that make it up, paginated instead of truncated, and
 sees which QC metrics matter with a red/yellow/green read at a glance,
@@ -42,8 +42,8 @@ PAGE_SIZE = 25
 THUMB_SIZE = 220
 
 # The metrics a user actually cares about for "does this particle belong
-# in this average", in priority order -- CTF/defocus first (what the build plan
-# ##1 identifies as the clearest, most literature-backed lever), then
+# in this average", in priority order -- CTF/defocus first (the clearest,
+# most literature-backed lever), then
 # alignment quality. Whichever of these exist on the loaded particles get
 # used; nothing else does, deliberately, so the page never turns into a
 # dropdown of forty columns nobody asked for.
@@ -102,7 +102,7 @@ def _query_href(query, **overrides):
 
 
 def _level_for_fraction(fraction):
-    """The red/yellow/green read the build plan ##22 asks for: green = clean,
+    """The red/yellow/green read: green = clean,
     yellow = a minority flagged, red = a large chunk flagged. 5%/20% are
     round, defensible cut points -- not a claim about a physically
     "correct" threshold, just a legible three-tier scale."""
@@ -271,7 +271,7 @@ def _build_page_cache(df, class_col, ctf_by_tomogram=None, tomogram_dims=None, j
     stat_tiles.append(metric_tile("%d" % n_standout_total, "particles stand out"))
 
     # One overview row PER analyzed parameter with its own red/yellow/green
-    # read (the build plan ##22) -- not one combined count, so a user can see
+    # read -- not one combined count, so a user can see
     # which specific metric is the problem for this job.
     signal_rows = [
         _signal_row(

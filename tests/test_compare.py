@@ -5,7 +5,9 @@ from pathlib import Path
 
 import pytest
 
-TESTDATA = Path("/path/to/relion-project")
+from conftest import env_path
+
+TESTDATA = env_path("RELION_ORIGIN_TEST_PROJECT") or Path("/nonexistent")
 
 try:
     import reliontree  # noqa: F401

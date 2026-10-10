@@ -19,7 +19,7 @@ try:
 except ImportError as _exc:  # pragma: no cover
     raise ImportError(
         "relion_origin.lineage needs the reliontree package (pip install reliontree) "
-        "for pipeline-graph parsing -- see the build plan 'Relationship to reliontree'"
+        "for pipeline-graph parsing"
     ) from _exc
 
 from .io import load_particles

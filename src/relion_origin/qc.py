@@ -6,7 +6,7 @@ column -- CTF resolution, defocus, alignment confidence, template-matching
 score, whatever the STAR file has.
 
 This is post-hoc statistics over existing metadata: it flags *candidates*,
-not verdicts. See the build plan and README.md ("The white rabbit") for why a
+not verdicts. See README.md ("The white rabbit") for why a
 hard "this particle belongs in class Y" claim needs a targeted RELION
 rerun, not just a metadata score.
 """

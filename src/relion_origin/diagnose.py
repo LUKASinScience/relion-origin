@@ -1,7 +1,7 @@
 """Which of the three usual reasons is limiting a class's resolution, and
 what to change in RELION to move past it -- a heuristic, not a verdict.
 
-Theory (see the build plan §27): a class/average that isn't at the resolution its
+Theory: a class/average that isn't at the resolution its
 particle count should allow is limited by one of three things, and each
 needs a different fix -- more classification is useless if the real problem
 is CTF, and re-extracting at a finer pixel size is useless if the real

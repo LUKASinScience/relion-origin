@@ -3,7 +3,7 @@ iterations, via overlap-matching between consecutive iterations -- RELION
 doesn't keep class labels stable across iterations, so diffing labels
 directly would misread a renumbered class as churn.
 
-Prior art (see the build plan §29): `chenyiguang2026/RELION-Convergence-Inspector`
+Prior art: `chenyiguang2026/RELION-Convergence-Inspector`
 does this at much greater depth (angular change under Cn symmetry, map
 correlation, three separate stability conclusions). This module covers only
 the class-switch-rate piece, sized for what `diagnose.py` and
@@ -98,7 +98,7 @@ def stable_since_iteration(convergence_df, switch_rate_threshold=0.05, min_conse
     table is shorter than `min_consecutive`.
 
     Same "classification became stable" definition as
-    RELION-Convergence-Inspector (the build plan §29): deliberately stricter than
+    RELION-Convergence-Inspector: deliberately stricter than
     "the single quietest transition" -- one calm iteration surrounded by
     churn isn't convergence.
     """

@@ -9,7 +9,7 @@ dimensions):
   STA-specific, needs tomogram dimensions (`edge_distance_sta`).
 - particles too close to a micrograph's own image edge pick up
   extraction interpolation artifacts ("fringe"/"barcode" patterns) -- a
-  distinct SPA failure mode, community-confirmed (see the build plan ##16),
+  distinct SPA failure mode, community-confirmed,
   not the same problem as the STA one above (`edge_distance_spa`).
 - micrographs/tomograms with an unusually low or high particle count are
   worth a second look (picking failure, contamination, empty grid square)
@@ -68,7 +68,7 @@ def edge_distance_spa(particles_df, micrograph_dims_df, size_x_col="SizeX", size
     """SPA counterpart to `edge_distance_sta`: distance (Angstrom) from
     each particle to the nearest *micrograph* image boundary along X/Y --
     not the tomogram-volume-edge problem above, but a distinct, separately
-    documented SPA failure mode (see the build plan ##16): particles extracted
+    documented SPA failure mode: particles extracted
     near a micrograph's image edge or beam edge pick up interpolation
     "fringe"/"barcode" artifacts during extraction.
 

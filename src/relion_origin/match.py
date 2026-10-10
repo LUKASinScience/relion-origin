@@ -35,7 +35,7 @@ def match_by_coordinate(
     `io.load_tomograms_star` to also re-center the target coordinates on
     the tomogram (RELION's pixel coordinates are corner-origin, pytom's
     are tomogram-centered -- without this correction nothing matches even
-    though both files describe the same particles; see the build plan ##6).
+    though both files describe the same particles).
     Leave it None for SPA data, where both sides already share the same
     (uncentered) coordinate convention.
 
@@ -110,7 +110,7 @@ def match_by_coordinate(
     # brute-force (n, m, 3) distance matrix per tomogram group -- fine at
     # typical group sizes, but an (m, 3) candidate block that size would
     # allocate multiple GB, so queries are chunked to cap memory rather
-    # than assuming groups stay small (see the build plan ##6 review notes).
+    # than assuming groups stay small.
     _MAX_PAIRS_PER_CHUNK = 20_000_000  # ~480 MB of float64 deltas at 3 dims
 
     for key, target_positions in target_keys.groupby(target_keys).groups.items():
