@@ -1,19 +1,16 @@
 # relion-origin cheatsheet
 
-For anyone testing this against a real project. See
-README.md "Testing" for what to check and report back; this is just the
-copy-paste commands.
+Copy-paste commands for the most common tasks.
 
 ## Setup
 
 ```bash
-# from a checkout, no install needed (reliontree checkout must be a sibling dir,
-# or `pip install reliontree` if you don't have one)
+# from a checkout, no install needed (reliontree checkout must be a sibling dir)
 cd relion-origin
 export PYTHONPATH=src:/path/to/reliontree/src
 
-# or, properly installed:
-pip install -e .
+# or, properly installed (pulls reliontree along):
+pip install "git+https://github.com/LUKASinScience/relion-origin"
 ```
 
 ## QC GUI (per-class average + its standout particles)
@@ -283,7 +280,7 @@ write_candidate_subset(candidates, "candidates.star")
 
 ## Using the installed console scripts instead of `python -m`
 
-`pip install -e .` (see Setup above) also installs these directly, so you
+The install (see Setup above) also installs these directly, so you
 can drop the `python3 -m relion_origin.` prefix everywhere above:
 
 ```bash
@@ -292,29 +289,4 @@ relion-origin-rerun particles.star candidates.star
 relion-origin-compare /path/to/relion_project Refine3D/job006 Refine3D/job010
 relion-origin-methods particles.star --project-dir ... --job-before ... --job-after ...
 relion-origin-boxsize --kv 300 --cs 2.7 --pixel-size 11.056 --resolution 20.0 --tomograms-star ...
-```
-
-All five verified working end to end against the local test project on
-2026-09-22 (both as `python3 -m ...` and as the installed console scripts).
-
-## Running the tests
-
-```bash
-python3 -m venv .venv && .venv/bin/pip install pytest starfile numpy pandas
-.venv/bin/pip install -e /path/to/reliontree   # or: .venv/bin/pip install reliontree
-.venv/bin/pip install -e .
-PYTHONPATH=src .venv/bin/python -m pytest tests/ -v   # 35 tests, all pass as of 2026-09-22
-
-# or, without a venv/pytest, the standalone-runnable ones only:
-PYTHONPATH=src python3 tests/test_smoke.py
-PYTHONPATH=src python3 tests/test_ctf.py
-PYTHONPATH=src python3 tests/test_rerun.py
-PYTHONPATH=src python3 tests/test_ctf_consistency.py
-PYTHONPATH=src python3 tests/test_methods.py
-PYTHONPATH=src python3 tests/test_box_size.py
-PYTHONPATH=src python3 tests/test_spatial.py
-PYTHONPATH=src python3 tests/test_dose_gaps.py
-PYTHONPATH=src python3 tests/test_orientation.py
-# test_lineage.py, test_compare.py, test_match_centering.py need pytest
-# (they use pytest.mark.skipif) -- use the venv route above for those.
 ```
