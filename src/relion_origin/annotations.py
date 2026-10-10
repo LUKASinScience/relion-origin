@@ -21,7 +21,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from .orientation import angular_coverage_score, flag_clustered_orientation
+from .orientation import orientation_coverage
 from .qc import classification_mixing_excess
 
 TOOL = "relion-origin"
@@ -41,8 +41,14 @@ def write_annotations(project_dir, tool, jobs):
     return path
 
 
-def annotate_particles(df, class_col="rlnClassNumber"):
-    """Annotation dicts for one job's particle table (pure; no file access)."""
+GAPS_NOTE = 0.2        # report views once this share of the (symmetry-folded) viewing sphere is poorly covered
+GAPS_WARN = 0.5        # single-particle: more than half of all views nearly empty is a real preferred orientation
+
+
+def annotate_particles(df, class_col="rlnClassNumber", sym="C1", tomography=None):
+    """Annotation dicts for one job's particle table (pure; no file access). `sym`: the job's `sym_name`.
+    `tomography`: True for a subtomogram-averaging project (reliontree's `tree["experiment"]`); None = guess from the
+    table (a `rlnTomoName` column)."""
     out = []
     excess = classification_mixing_excess(df, class_col)
     if excess > MIXING_EXCESS_WARN:
@@ -50,33 +56,40 @@ def annotate_particles(df, class_col="rlnClassNumber"):
                     "detail": "%.0f points more particles than chance sit in a small class with high alignment "
                               "confidence or in a large class with low confidence. Candidates to check, not verdicts." % (100 * excess)})
     if {"rlnAngleRot", "rlnAngleTilt"} <= set(df.columns):
-        work = df if class_col in df.columns else df.assign(**{class_col: 1})
-        scores = angular_coverage_score(work, class_col)
-        listing = ", ".join("C%s R=%.2f" % (c, r) for c, r in scores.items())
-        if len(scores) >= 4:
-            flagged = flag_clustered_orientation(work, class_col)
-            bad = [c for c, f in flagged.items() if f]
-            if bad:
-                out.append({"label": "clustered views: " + ", ".join("C%s" % c for c in bad), "level": "warn",
-                            "detail": "Viewing directions of these classes are more one-sided than your other classes "
-                                      "(R: 0 = even, 1 = one direction). " + listing})
-        else:
-            out.append({"label": "orientation R=%.2f" % scores.max(), "level": "info",
-                        "detail": "Mean resultant length of viewing directions (0 even, 1 one direction). " + listing})
+        cov = orientation_coverage(df, sym=sym)
+        if cov is not None and cov["poor_fraction"] >= GAPS_NOTE:
+            if tomography is None:
+                tomography = "rlnTomoName" in df.columns
+            pct = 100 * cov["poor_fraction"]
+            level = "warn" if pct >= 100 * GAPS_WARN and not tomography else "info"
+            why = ("Subtomogram averaging: the picking geometry (e.g. particles on a membrane) limits the views, so gaps are "
+                   "expected here; check that the missing wedge is not the only information in them. "
+                   if tomography else
+                   "A preferred orientation: the map will be anisotropic and the resolution estimate optimistic. ")
+            out.append({"label": "views: %.0f%% of sphere sparse" % pct, "level": level,
+                        "detail": "%.0f%% of all viewing directions hold fewer than 20%% of the particles an even distribution would "
+                                  "put there (symmetry %s taken into account, evenness %.2f of 1). %sSee the orientation globe in reliontree."
+                                  % (pct, sym or "C1", cov["evenness"], why)})
     return out
 
 
 def annotate_project(project_dir, class_col="rlnClassNumber"):
     """{job: annotations} for every Class3D/Refine3D job that has a readable particle table.
     Returns (annotations, skipped) where skipped = [(job, reason)]."""
-    from .lineage import list_jobs_with_particles
+    import reliontree
     from .io import load_particles
+    from .lineage import find_particle_file
+    tree = reliontree.build_tree(project_dir)
     result, skipped = {}, []
-    for job, star in list_jobs_with_particles(project_dir).items():
+    for job in reliontree.ordered_jobs(tree):
         if job.split("/")[0] not in ANNOTATED_TYPES:
             continue
+        star = find_particle_file(tree["job_dirs"][job])
+        if star is None:
+            continue
         try:
-            notes = annotate_particles(load_particles(star), class_col)
+            notes = annotate_particles(load_particles(star), class_col, tree["options"].get(job, {}).get("sym_name", "C1"),
+                                       tomography={"sta": True, "spa": False}.get(tree["experiment"]["type"]))
         except Exception as exc:  # one unreadable job must not stop the rest
             skipped.append((job, str(exc)))
             continue

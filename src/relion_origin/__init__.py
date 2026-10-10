@@ -26,7 +26,7 @@ from .iteration_convergence import iteration_convergence, stable_since_iteration
 from .lineage import list_jobs_with_particles, particle_flow
 from .match import match_by_coordinate
 from .methods import draft_methods_paragraph
-from .orientation import angular_coverage_score, flag_clustered_orientation
+from .orientation import angular_coverage_score, flag_clustered_orientation, orientation_coverage, orientation_histogram
 from .qc import candidate_misclassified, classification_mixing_excess, classification_purity_fraction, flag_class_outliers, flag_outliers, per_class_stats
 from .reference import class_reference_similarity, map_similarity
 from .rerun import write_candidate_subset
@@ -80,4 +80,6 @@ __all__ = [
     "particle_density_outliers",
     "angular_coverage_score",
     "flag_clustered_orientation",
+    "orientation_coverage",
+    "orientation_histogram",
 ]
