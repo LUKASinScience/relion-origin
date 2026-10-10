@@ -25,7 +25,8 @@ def test_clustered_class_is_flagged_with_five_classes():
     labels = [n["label"] for n in notes]
     assert any(l == "clustered views: C3" for l in labels)
     assert all(n["level"] in ("good", "warn", "bad", "info") and n["detail"] for n in notes)
-    assert not any("QC candidates" in l for l in labels)  # not calibrated, see annotations.py
+    assert not any("QC candidates" in l for l in labels)  # raw share is not calibrated, see annotations.py
+    assert not any(l.startswith("mixed beyond chance") for l in labels)  # these classes are independent of confidence
 
 
 def test_few_classes_get_an_info_line_not_a_flag():
@@ -46,3 +47,10 @@ def test_write_annotations_roundtrip_and_name_check(tmp_path):
     assert json.loads(path.read_text())["Class3D/job001"][0]["label"] == "x"
     with pytest.raises(ValueError):
         write_annotations(tmp_path, "../evil", {})
+
+
+def test_mixing_beyond_chance_is_annotated_only_when_it_exceeds_chance():
+    linked = pd.DataFrame({"rlnClassNumber": [1] * 14 + [2] * 6,
+                           "rlnMaxValueProbDistribution": [0.1 + 0.03 * i for i in range(14)] + [0.8, 0.85, 0.9, 0.9, 0.95, 0.95]})
+    notes = annotate_particles(linked)
+    assert notes and notes[0]["label"].startswith("mixed beyond chance") and notes[0]["level"] == "warn"

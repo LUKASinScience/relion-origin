@@ -5,10 +5,12 @@ with level good / warn / bad / info -- so neither side imports the other for it
 (reliontree reads it, any tool can write it; see reliontree's
 `relion_annotations.py`).
 
-Only signals that discriminate on real data are written. The QC-candidate share
-(`classification_purity_fraction`) is deliberately NOT: with its default
-confidence threshold (the median) it flags about half of all particles of any
-classification (54% on a real STA project), so a pill would say "warn" everywhere.
+Only signals that discriminate on real data are written. The raw QC-candidate
+share (`classification_purity_fraction`) is NOT: with its default confidence
+threshold (the median) it flags about half of all particles of any classification
+(0.38-0.58 on 30 real jobs, the same as shuffled class labels). Its chance-corrected
+form, `classification_mixing_excess`, is annotated only when it clears
+MIXING_EXCESS_WARN (3 of those 30 jobs).
 """
 
 import argparse
@@ -20,9 +22,11 @@ from pathlib import Path
 import pandas as pd
 
 from .orientation import angular_coverage_score, flag_clustered_orientation
+from .qc import classification_mixing_excess
 
 TOOL = "relion-origin"
 ANNOTATED_TYPES = ("Class3D", "Refine3D")
+MIXING_EXCESS_WARN = 0.05   # share of particles flagged beyond what chance gives
 
 
 def write_annotations(project_dir, tool, jobs):
@@ -40,6 +44,11 @@ def write_annotations(project_dir, tool, jobs):
 def annotate_particles(df, class_col="rlnClassNumber"):
     """Annotation dicts for one job's particle table (pure; no file access)."""
     out = []
+    excess = classification_mixing_excess(df, class_col)
+    if excess > MIXING_EXCESS_WARN:
+        out.append({"label": "mixed beyond chance (+%.0f pts)" % (100 * excess), "level": "warn",
+                    "detail": "%.0f points more particles than chance sit in a small class with high alignment "
+                              "confidence or in a large class with low confidence. Candidates to check, not verdicts." % (100 * excess)})
     if {"rlnAngleRot", "rlnAngleTilt"} <= set(df.columns):
         work = df if class_col in df.columns else df.assign(**{class_col: 1})
         scores = angular_coverage_score(work, class_col)
