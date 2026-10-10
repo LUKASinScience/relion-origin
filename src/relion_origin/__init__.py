@@ -27,7 +27,8 @@ from .lineage import list_jobs_with_particles, particle_flow
 from .match import match_by_coordinate
 from .methods import draft_methods_paragraph
 from .orientation import angular_coverage_score, flag_clustered_orientation
-from .qc import candidate_misclassified, classification_purity_fraction, flag_class_outliers, flag_outliers, per_class_stats
+from .qc import candidate_misclassified, classification_mixing_excess, classification_purity_fraction, flag_class_outliers, flag_outliers, per_class_stats
+from .reference import class_reference_similarity, map_similarity
 from .rerun import write_candidate_subset
 from .spatial import edge_distance_spa, edge_distance_sta, flag_near_edge, particle_density_outliers
 
@@ -52,6 +53,9 @@ __all__ = [
     "flag_class_outliers",
     "candidate_misclassified",
     "classification_purity_fraction",
+    "classification_mixing_excess",
+    "class_reference_similarity",
+    "map_similarity",
     "diagnose_class",
     "diagnose_class_from_flags",
     "iteration_convergence",

@@ -124,6 +124,38 @@ def candidate_misclassified(
 
 
 def classification_purity_fraction(df, class_col="rlnClassNumber", confidence_col="rlnMaxValueProbDistribution", **kwargs):
-    """Fraction of particles flagged by `candidate_misclassified` (0-1)."""
+    """Fraction of particles flagged by `candidate_misclassified` (0-1).
+
+    NOT a purity measure on its own: with the default threshold (the median
+    confidence) about half of all particles are flagged *by construction*, even
+    when class membership has nothing to do with confidence. On a real STA project
+    (30 classifications) it read 0.38-0.58, equal to the 0.50 a random shuffle of
+    the class labels gives. Use `classification_mixing_excess` for a number that
+    is 0 when nothing is going on."""
     flagged = candidate_misclassified(df, class_col=class_col, confidence_col=confidence_col, **kwargs)["_qc_candidate"]
     return (flagged != "").sum() / len(flagged)
+
+
+def classification_mixing_excess(df, class_col="rlnClassNumber", confidence_col="rlnMaxValueProbDistribution"):
+    """How many more particles `candidate_misclassified` flags (default thresholds)
+    than if class membership were independent of alignment confidence -- as a share
+    of all particles; around 0 means the flags are what chance alone produces.
+
+    The expected share is exact for the default rule: a particle is flagged when
+    (large class and confidence below the median) or (small class and confidence
+    at or above it), so with independence the expectation is
+    P(large) * P(low) + P(small) * P(high). Measured on a real STA project
+    (30 Class3D jobs, 4-6 classes): excess -0.05 .. +0.08, median 0.002, while
+    the raw flagged share was 0.38-0.58 -- see `classification_purity_fraction`.
+    Not validated as a predictor of anything (no ground truth for single particles);
+    it only removes the by-construction offset. Returns 0.0 for fewer than 2 classes."""
+    if class_col not in df.columns or confidence_col not in df.columns or df[class_col].nunique() < 2 or len(df) == 0:
+        return 0.0
+    observed = classification_purity_fraction(df, class_col=class_col, confidence_col=confidence_col)
+    confidence = pd.to_numeric(df[confidence_col], errors="coerce")
+    threshold = confidence.median()
+    counts = df[class_col].value_counts()
+    large = df[class_col].isin(set(counts[counts >= counts.median()].index)).mean()
+    low = (confidence < threshold).mean()
+    high = (confidence >= threshold).mean()
+    return float(observed - (large * low + (1 - large) * high))
