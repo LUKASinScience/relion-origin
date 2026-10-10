@@ -55,3 +55,16 @@ def test_occupancy_trajectory_detects_collapse(tmp_path):
         starfile.write({"model_classes": pd.DataFrame({"rlnClassDistribution": dist})}, tmp_path / ("run_it%03d_model.star" % it))
     traj = ro.class_occupancy_trajectory(tmp_path)
     assert traj.shape == (2, 3) and ro.collapsed_classes(traj) == [3]
+
+
+def test_class_occupancy_trajectory_reads_only_the_classes_block(tmp_path):
+    def model(dist):
+        rows = "\n".join("class%d.mrc %s 0.5" % (i + 1, d) for i, d in enumerate(dist))
+        return ("data_model_general\n\n_rlnCurrentResolution 4.0\n\n\ndata_model_classes\n\nloop_ \n"
+                "_rlnReferenceImage #1 \n_rlnClassDistribution #2 \n_rlnAccuracyRotations #3 \n%s\n\n\n"
+                "data_model_class_1\n\nloop_ \n_rlnSpectralIndex #1 \n_rlnClassDistribution #2 \n0 99\n\n" % rows)
+    (tmp_path / "run_it001_model.star").write_text(model([0.6, 0.4]))
+    (tmp_path / "run_it002_model.star").write_text(model([0.7, 0.3]))
+    (tmp_path / "run_it003_model.star").write_text("data_model_general\n\n_rlnCurrentResolution 4.0\n")  # no classes block: skipped
+    df = ro.class_occupancy_trajectory(tmp_path)
+    assert df.shape == (2, 2) and list(df.index) == [1, 2] and df.loc[2, 1] == 0.7 and df.loc[1, 2] == 0.4

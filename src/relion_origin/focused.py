@@ -15,6 +15,7 @@ Pure numpy/pandas; the MRC reader handles the modes RELION writes.
 """
 
 import re
+from functools import lru_cache
 import struct
 from pathlib import Path
 
@@ -113,6 +114,40 @@ def rank_class_differences(maps, compact_fraction=0.02, sigma_threshold=4.0):
     return sorted(rows, key=lambda r: -r["peak_sigma"])
 
 
+@lru_cache(maxsize=None)
+def _class_distribution(path, mtime):
+    """`rlnClassDistribution` of every class from one `*_model.star`, or None. Reads only the `data_model_classes`
+    block: a full `starfile.read` also parses the per-group and per-class tables (thousands of rows) and cost ~0.2 s
+    per file, which made a page over 35 classifications take 5 minutes. `mtime` is only part of the cache key."""
+    try:
+        lines = Path(path).read_text(encoding="utf-8", errors="ignore").splitlines()
+    except OSError:
+        return None
+    try:
+        i = lines.index("data_model_classes") + 1
+    except ValueError:
+        return None
+    while i < len(lines) and lines[i].strip().lower() != "loop_":
+        if lines[i].startswith("data_"):
+            return None
+        i += 1
+    i += 1
+    columns = []
+    while i < len(lines) and lines[i].lstrip().startswith("_"):
+        columns.append(lines[i].split()[0])
+        i += 1
+    if "_rlnClassDistribution" not in columns:
+        return None
+    idx = columns.index("_rlnClassDistribution")
+    values = []
+    while i < len(lines) and lines[i].strip() and not lines[i].startswith(("data_", "loop_")):
+        parts = lines[i].split()
+        if len(parts) > idx:
+            values.append(float(parts[idx]))
+        i += 1
+    return tuple(values)
+
+
 def class_occupancy_trajectory(job_dir):
     """DataFrame (rows: iteration, columns: class number) of
     `rlnClassDistribution` from every run_it*_model.star of a Class3D job.
@@ -122,11 +157,9 @@ def class_occupancy_trajectory(job_dir):
         m = re.search(r"_it(\d+)_model", p.name)
         if not m:
             continue
-        blocks = starfile.read(p)
-        classes = blocks.get("model_classes") if isinstance(blocks, dict) else blocks  # starfile returns a bare frame for one-block files
-        if classes is None or "rlnClassDistribution" not in classes.columns:
-            continue
-        series[int(m.group(1))] = classes["rlnClassDistribution"].astype(float).reset_index(drop=True)
+        values = _class_distribution(str(p), p.stat().st_mtime)
+        if values:
+            series[int(m.group(1))] = pd.Series(values, dtype=float)
     if not series:
         return pd.DataFrame()
     df = pd.DataFrame(series).T.sort_index()
