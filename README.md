@@ -1,9 +1,8 @@
 # relion-origin
 
-**Status: early working version, not released/packaged to PyPI yet.**
-Installs cleanly from a checkout (`pip install -e .`), all automated tests
-pass, and every command + the GUI has been verified end to end — but only
-against one real project so far. See "Testing" below for how to try it
+**Status: early working version. Install from GitHub; it is not on PyPI.**
+All automated tests pass, and every command + the GUI has been verified end to end — but only
+against a handful of real projects so far. See "Testing" below for how to try it
 against your own project, STA or SPA — that's the actual next step before
 trusting the numbers generally.
 
@@ -204,6 +203,7 @@ it flags about half of all particles of any classification.
 
 ```bash
 python3 -m venv .venv && source .venv/bin/activate
+# quickest: pip install "git+https://github.com/LUKASinScience/relion-origin"   (pulls reliontree along)
 pip install "git+https://github.com/LUKASinScience/reliontree@v0.3.0"     # or: pip install -e ../reliontree
 pip install -e .                                                         # relion-origin itself (+ starfile, numpy, pandas)
 python -c "import relion_origin; print(relion_origin.__version__)"       # it is an importable module, not only a CLI
