@@ -5,7 +5,9 @@ from pathlib import Path
 
 import pytest
 
-TESTDATA = Path("/path/to/relion-project/Class3D/job001")
+from conftest import env_path
+
+TESTDATA = (env_path("RELION_ORIGIN_TEST_PROJECT") or Path("/nonexistent")) / "Class3D" / "job001"
 
 pytestmark = pytest.mark.skipif(not TESTDATA.is_dir(), reason="local test dataset not present")
 
@@ -25,7 +27,7 @@ def test_iteration_convergence_matches_known_values():
     assert (df["n_matched"] == 8100).all()
     # This run never sustains <=5% switch rate for 3 consecutive
     # transitions -- confirms the strong missing-wedge/preferred-orientation
-    # heterogeneity already documented for this dataset in BAUPLAN §14.
+    # heterogeneity of this dataset.
     assert stable_since_iteration(df) is None
 
 

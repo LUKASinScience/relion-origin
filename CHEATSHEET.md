@@ -1,6 +1,6 @@
 # relion-origin cheatsheet
 
-For anyone (or anyone else testing this against a real project). See
+For anyone testing this against a real project. See
 README.md "Testing" for what to check and report back; this is just the
 copy-paste commands.
 
@@ -79,8 +79,8 @@ dims, ctf_by_tomo = load_tomograms_star("particles_..._tomograms.star")
 
 result = match_by_coordinate(source, target, tolerance=5.0, tomogram_dims=dims)
 print((result["_match_source_index"] >= 0).mean(), "fraction matched")
-# tomogram_dims=dims is STA-only (WarpTools/pytom coordinate centering fix,
-# see BAUPLAN.md ##6) -- leave it out for SPA data.
+# tomogram_dims=dims is STA-only (WarpTools/pytom coordinate centering fix) --
+# leave it out for SPA data.
 ```
 
 ## STA per-tomogram CTF/defocus QC
@@ -97,7 +97,7 @@ enriched = attach_tomogram_ctf(particles, ctf_by_tomo, name_col="rlnMicrographNa
 # adds _tomoDefocusMean / _tomoDefocusStd / _tomoAstigmatismMean per particle
 ```
 
-## CTF-consistency flagging (the literature-backed lever, BAUPLAN.md ##10)
+## CTF-consistency flagging (the literature-backed lever)
 
 Flags tomograms/tilts whose defocus is erratic rather than just reporting
 mean/spread -- NovaCTF showed CTF quality per tilt is a real, measured STA

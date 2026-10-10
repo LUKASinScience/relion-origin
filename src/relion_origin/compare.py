@@ -1,5 +1,5 @@
 """Before/after resolution comparison between two RELION jobs -- the actual
-evidence this tool's own honesty section (BAUPLAN.md ##10) says is
+evidence this tool's own honesty section says is
 missing: a measured Angstrom number for what a QC-candidate-driven rerun
 bought you, not a claim.
 

@@ -11,8 +11,8 @@ same pattern as `reliontree`:
     flags = relion_origin.flag_class_outliers(df, "rlnDefocusU")
     candidates = relion_origin.candidate_misclassified(df)
 
-See README.md for the full command-line tools and BAUPLAN.md for the
-per-module design decisions.
+See README.md for the full command-line tools and each module's docstring
+for its design decisions.
 """
 
 from .annotations import annotate_particles, annotate_project, write_annotations

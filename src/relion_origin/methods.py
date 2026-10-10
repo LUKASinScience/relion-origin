@@ -5,7 +5,7 @@ section, not a citation-ready sentence (same spirit as reliontree's own
 
 Publication-readiness is also a growth lever, not just convenience: a
 methods paragraph that names the tool is how a niche scientific tool like
-this one actually spreads through the field (see BAUPLAN.md ##12).
+this one actually spreads through the field.
 """
 
 
@@ -77,8 +77,8 @@ def draft_methods_paragraph(candidates_df=None, ctf_summary=None, resolution_com
     """Assemble whichever QC steps were actually run into a short draft
     paragraph. Every argument is optional -- pass only what you have.
     Ends with a caveat sentence (candidates, not verdicts) whenever any
-    QC ranking sentence is included, matching this tool's own README/
-    BAUPLAN position on what its candidate lists mean."""
+    QC ranking sentence is included, matching this tool's own README
+    position on what its candidate lists mean."""
     sentences = []
     candidate_sentence = qc_candidate_sentence(candidates_df) if candidates_df is not None else None
     if candidate_sentence:

@@ -1,7 +1,6 @@
 """Shared design tokens/components for relion-origin's and reliontree's
 stdlib-http.server GUIs -- one CSS foundation instead of each project
-reinventing inline styles, aimed at closing the gap to cryoSPARC's polish
-(BAUPLAN.md ##17): a semantic color system, cards instead of raw tables,
+reinventing inline styles, aimed at closing the gap to cryoSPARC's polish: a semantic color system, cards instead of raw tables,
 badges for status/quality, and dark mode as a first-class default.
 
 Kept as a plain CSS string, embedded inline (no CDN, no build step) --
