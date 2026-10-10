@@ -4,10 +4,20 @@ version = "0.2.0"
 description = "Per-particle provenance, lineage and QC analysis for RELION projects (companion to reliontree, needs starfile)"
 readme = "README.md"
 requires-python = ">=3.9"
+license = "AGPL-3.0-or-later"
+license-files = ["LICENSE"]
+authors = [{ name = "Lukas W. Bauer" }]
+keywords = ["cryo-EM", "RELION", "subtomogram averaging", "quality control"]
 dependencies = [
     "starfile",
-    "reliontree>=0.2.0",
+    "numpy",
+    "pandas",
+    "reliontree>=0.3.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/LUKASinScience/relion-origin"
+Companion = "https://github.com/LUKASinScience/reliontree"
 
 [project.scripts]
 relion-origin = "relion_origin.cli:main"

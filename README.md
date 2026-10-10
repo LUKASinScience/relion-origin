@@ -218,12 +218,12 @@ Zenodo 11068319, are 29.5 GB and were too slow to fetch).
 
 ## Install
 
-`reliontree` (>= 0.2.0) is a dependency and is not on PyPI yet, so `pip install -e .` alone fails with
+`reliontree` (>= 0.3.0) is a dependency and is not on PyPI yet, so `pip install -e .` alone fails with
 `No matching distribution found for reliontree`. Install it first, from its checkout or from the tagged release:
 
 ```bash
 python3 -m venv .venv && source .venv/bin/activate
-pip install "git+https://github.com/LUKASinScience/reliontree@v0.2.0"     # or: pip install -e ../reliontree
+pip install "git+https://github.com/LUKASinScience/reliontree@v0.3.0"     # or: pip install -e ../reliontree
 pip install -e .                                                         # relion-origin itself (+ starfile, numpy, pandas)
 python -c "import relion_origin; print(relion_origin.__version__)"       # it is an importable module, not only a CLI
 ```
@@ -238,7 +238,7 @@ version:
 
 ```bash
 cd relion-origin
-pip install -e .                       # installs starfile + reliontree (>=0.2.0) + the console scripts
+pip install -e .                       # installs starfile + reliontree (>=0.3.0) + the console scripts
 relion-origin /path/to/a/particles.star            # opens the QC GUI
 relion-origin-rerun particles.star candidates.star # write a QC candidate subset
 relion-origin-compare /path/to/project JobA JobB   # resolution before/after
@@ -281,3 +281,7 @@ export RELION_ORIGIN_TEST_MATCH_DIR=/path/to/dir/with/the/star/files   # match-c
 export RELION_ORIGIN_TEST_TOMOGRAMS_STAR=/path/to/..._tomograms.star
 python -m pytest tests
 ```
+
+## License
+
+AGPL-3.0-or-later, the same as [reliontree](https://github.com/LUKASinScience/reliontree), which it imports.
