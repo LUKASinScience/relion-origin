@@ -200,6 +200,15 @@ Two things on the page (BAUPLAN.md ##19, ##21):
   required). One link downloads a cleaned STAR file with every flagged
   particle excluded, across all classes.
 
+## Annotating the reliontree job tree
+
+`relion-origin-annotate <project>` writes orientation findings (viewing-direction
+clustering per class, angular coverage of a refinement) to
+`<project>/.reliontree/annotations/relion-origin.json`; reliontree (>=0.2.0 plus
+the annotations reader) shows them as pills on the job cards. The QC-candidate
+share is deliberately not annotated: with the default median confidence threshold
+it flags about half of all particles of any classification.
+
 ## Testing
 
 **Status as of 2026-09-22**: package installs cleanly (`pip install -e .`,
@@ -223,7 +232,7 @@ version:
 
 ```bash
 cd relion-origin
-pip install -e .                       # installs starfile + reliontree + 4 console scripts
+pip install -e .                       # installs starfile + reliontree (>=0.2.0) + the console scripts
 relion-origin /path/to/a/particles.star            # opens the QC GUI
 relion-origin-rerun particles.star candidates.star # write a QC candidate subset
 relion-origin-compare /path/to/project JobA JobB   # resolution before/after
