@@ -2,7 +2,8 @@
 
 RELION_ORIGIN_TEST_PROJECT          a RELION STA project directory (default_pipeline.star); used by the compare, lineage and
                                     iteration-convergence tests, which expect the job ids and numbers of one particular dataset
-RELION_ORIGIN_TEST_MATCH_DIR        directory with match_source.star and run_it025_data.star (match-centering test)
+RELION_ORIGIN_TEST_MATCH_DIR        directory with the source particle table and run_it025_data.star (match-centering test)
+RELION_ORIGIN_TEST_MATCH_STAR       file name of that source table inside the directory (default: match_source.star)
 RELION_ORIGIN_TEST_TOMOGRAMS_STAR   the matching *_tomograms.star
 """
 

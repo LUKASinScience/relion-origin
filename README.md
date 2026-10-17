@@ -6,6 +6,13 @@ against a handful of real projects so far. See "Testing" below for how to try it
 against your own project, STA or SPA — that's the actual next step before
 trusting the numbers generally.
 
+**Quick start** (needs [reliontree](https://github.com/LUKASinScience/reliontree) >= 0.3.0, see Install):
+
+```bash
+relion-origin /path/to/relion_project --job Refine3D/job006   # QC GUI: which particles earned their place?
+relion-origin-annotate /path/to/relion_project                # write findings that reliontree shows on its job cards
+```
+
 A separate, optional companion to
 [reliontree](https://github.com/LUKASinScience/reliontree) for the analyses
 that need real per-particle STAR-table parsing — things reliontree
@@ -229,6 +236,19 @@ relion-origin-annotate /path/to/project            # write orientation/QC findin
 
 or, without installing, straight from a checkout (see CHEATSHEET.md for the
 full `PYTHONPATH` form).
+
+## Testing
+
+Automated tests: `pip install pytest && python -m pytest tests` (64 passed, 5 skipped on the author's machine,
+2026-10-16; skips depend on optional data).
+
+To try it on your own project before trusting the numbers (STA or SPA):
+
+1. Run `relion-origin /path/to/relion_project --job <a finished Class3D/Refine3D job>` and open the GUI.
+2. Compare the flagged particles with what you know: do they sit on ice contamination, carbon edges or tilt extremes?
+3. `relion-origin-rerun particles.star candidates.star` writes the candidate subset; re-refine it and compare resolution
+   with `relion-origin-compare /path/to/project JobA JobB`.
+4. If a number looks wrong, open an issue with the RELION version and the job type.
 
 ## Credits and third-party material
 
